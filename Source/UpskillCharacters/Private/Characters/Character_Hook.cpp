@@ -49,6 +49,32 @@ ACharacter_Hook::ACharacter_Hook()
 	
 }
 
+void ACharacter_Hook::HookAbility()
+{
+	GEngine->AddOnScreenDebugMessage(-1, 2, FColor::Green, TEXT("Called Hook Abil"));
+	FVector Start = GetFollowCamera()->GetComponentLocation();
+	FVector End = Start + GetFollowCamera()->GetForwardVector() * 500;
+	FHitResult Hit;
+
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(this);
+
+	if (GetWorld()->LineTraceSingleByChannel(Hit, Start, End, ECollisionChannel::ECC_Visibility, Params))
+	{
+		
+		if (Hit.GetActor()->ActorHasTag("Enemy"))
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 2, FColor::Red, TEXT("Hit Enemy"));
+			FVector PlayerLocation = GetActorLocation();
+			FVector EnemyLocation = Hit.GetActor()->GetActorLocation();
+
+			FVector Pull = FMath::Lerp(PlayerLocation, EnemyLocation, 0.5);
+		}
+	}
+
+	DrawDebugLine(GetWorld(), Start, End, FColor::Red, false);
+}
+
 // Called when the game starts or when spawned
 void ACharacter_Hook::BeginPlay()
 {
@@ -118,6 +144,9 @@ void ACharacter_Hook::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 	// "turnrate" is for devices that we choose to treat as a rate of change, such as an analog joystick
 	PlayerInputComponent->BindAxis("Turn Right / Left Mouse", this, &APawn::AddControllerYawInput);
 	PlayerInputComponent->BindAxis("Look Up / Down Mouse", this, &APawn::AddControllerPitchInput);
+
+	//Ability
+	PlayerInputComponent->BindAction("Ability", IE_Pressed, this, &ACharacter_Hook::HookAbility);
 
 
 }
