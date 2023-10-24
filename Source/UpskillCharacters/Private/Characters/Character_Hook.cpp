@@ -53,13 +53,13 @@ void ACharacter_Hook::HookAbility()
 {
 	GEngine->AddOnScreenDebugMessage(-1, 2, FColor::Green, TEXT("Called Hook Abil"));
 	FVector Start = GetFollowCamera()->GetComponentLocation();
-	FVector End = Start + GetFollowCamera()->GetForwardVector() * 500;
+	FVector End = Start + GetFollowCamera()->GetForwardVector() * m_HookDistance;
 	FHitResult Hit;
 
 	FCollisionQueryParams Params;
 	Params.AddIgnoredActor(this);
 
-	if (GetWorld()->LineTraceSingleByChannel(Hit, Start, End, ECollisionChannel::ECC_Visibility, Params))
+	if (GetWorld()->LineTraceSingleByChannel(Hit, Start, End, ECollisionChannel::ECC_Pawn, Params))
 	{
 		
 		if (Hit.GetActor()->ActorHasTag("Enemy"))
@@ -68,11 +68,13 @@ void ACharacter_Hook::HookAbility()
 			FVector PlayerLocation = GetActorLocation();
 			FVector EnemyLocation = Hit.GetActor()->GetActorLocation();
 
-			FVector Pull = FMath::Lerp(PlayerLocation, EnemyLocation, 0.5);
+			Hit.GetActor()->SetActorLocation(FMath::Lerp(PlayerLocation, EnemyLocation, 0.1f));
+
+			
 		}
 	}
 
-	DrawDebugLine(GetWorld(), Start, End, FColor::Red, false);
+	DrawDebugLine(GetWorld(), Start, End, FColor::Red, true, -2, 0U, 5);
 }
 
 // Called when the game starts or when spawned
@@ -110,6 +112,7 @@ void ACharacter_Hook::MoveRight(float Value)
 		AddMovementInput(Direction, Value);
 	}
 }
+
 
 void ACharacter_Hook::TurnAtRate(float Rate)
 {
