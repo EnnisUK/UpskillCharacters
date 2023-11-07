@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Characters/BurstHealCharacter.h"
+#include "Characters/DashCharacter.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/InputComponent.h"
@@ -14,7 +14,7 @@
 
 
 // Sets default values
-ABurstHealCharacter::ABurstHealCharacter()
+ADashCharacter::ADashCharacter()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -53,20 +53,52 @@ ABurstHealCharacter::ABurstHealCharacter()
 	
 }
 
-void ABurstHealCharacter::DashAbility()
+void ADashCharacter::DashAbility()
 {
+	FCollisionResponseParams ResponseParams;
+	FCollisionQueryParams QueryParams = FCollisionQueryParams::DefaultQueryParam;
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	QueryParams.AddIgnoredComponent(GetMesh());
+	FHitResult Hit;
+	const FVector StartTrace = GetMesh()->GetSocketLocation(FName("DashSocket"));
+	FRotator CurrentRotation = GetMesh()->GetSocketRotation(FName("DashSocket"));
+	FVector EndTrace = StartTrace + CurrentRotation.Vector() * TeleportDistance;
+
+	if (GetWorld()->LineTraceSingleByChannel(Hit, StartTrace, EndTrace, ECollisionChannel::ECC_Visibility, QueryParams, ResponseParams))
+	{
+		if (!HasDash)
+		{
+			SetActorLocation(EndTrace, true);
+			HasDash = true;
+			FTimerHandle DashHandle;
+			GetWorldTimerManager().SetTimer(DashHandle, this, &ADashCharacter::ResetDash, 1.0f, false);
+
+
+
+		}
+
+
+	}
+
+	DrawDebugLine(GetWorld(), StartTrace, EndTrace, FColor::Red, false, -1, 0, 1.5);
+}
+
+void ADashCharacter::ResetDash()
+{
+	HasDash = false;
 }
 
 
 
 // Called when the game starts or when spawned
-void ABurstHealCharacter::BeginPlay()
+void ADashCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	
 }
 
-void ABurstHealCharacter::MoveForward(float Value)
+void ADashCharacter::MoveForward(float Value)
 {
 	if ((Controller != nullptr) && (Value != 0.0f))
 	{
@@ -80,7 +112,7 @@ void ABurstHealCharacter::MoveForward(float Value)
 	}
 }
 
-void ABurstHealCharacter::MoveRight(float Value)
+void ADashCharacter::MoveRight(float Value)
 {
 	if ((Controller != nullptr) && (Value != 0.0f))
 	{
@@ -98,14 +130,14 @@ void ABurstHealCharacter::MoveRight(float Value)
 
 
 // Called every frame
-void ABurstHealCharacter::Tick(float DeltaTime)
+void ADashCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
 }
 
 // Called to bind functionality to input
-void ABurstHealCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+void ADashCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
@@ -114,8 +146,8 @@ void ABurstHealCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 
-	PlayerInputComponent->BindAxis("Move Forward / Backward", this, &ABurstHealCharacter::MoveForward);
-	PlayerInputComponent->BindAxis("Move Right / Left", this, &ABurstHealCharacter::MoveRight);
+	PlayerInputComponent->BindAxis("Move Forward / Backward", this, &ADashCharacter::MoveForward);
+	PlayerInputComponent->BindAxis("Move Right / Left", this, &ADashCharacter::MoveRight);
 
 	// We have 2 versions of the rotation bindings to handle different kinds of devices differently
 	// "turn" handles devices that provide an absolute delta, such as a mouse.
@@ -124,7 +156,7 @@ void ABurstHealCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 	PlayerInputComponent->BindAxis("Look Up / Down Mouse", this, &APawn::AddControllerPitchInput);
 
 	//Ability
-	PlayerInputComponent->BindAction("Ability", IE_Pressed, this, &ABurstHealCharacter::DashAbility);
+	PlayerInputComponent->BindAction("Ability", IE_Pressed, this, &ADashCharacter::DashAbility);
 
 
 }

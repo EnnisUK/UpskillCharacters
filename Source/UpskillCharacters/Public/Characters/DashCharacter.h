@@ -4,10 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "BurstHealCharacter.generated.h"
+#include "DashCharacter.generated.h"
 
 UCLASS()
-class UPSKILLCHARACTERS_API ABurstHealCharacter : public ACharacter
+class UPSKILLCHARACTERS_API ADashCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
@@ -21,12 +21,19 @@ class UPSKILLCHARACTERS_API ABurstHealCharacter : public ACharacter
 
 public:
 	// Sets default values for this character's properties
-	ABurstHealCharacter();
+	ADashCharacter();
 
 	void DashAbility();
 
+	void ResetDash();
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	float SphereRadius = 200.f;
+
+	bool HasDash;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	float TeleportDistance;
 
 
 protected:
