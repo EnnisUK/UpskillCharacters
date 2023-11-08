@@ -27,9 +27,21 @@ public:
 
 	void BuffAbility();
 
+	void CheckBuff();
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	float SphereRadius = 200.f;
+	void DamageCharacter(float DamageAmount);
+
+	UPROPERTY(VisibleAnywhere)
+	float CurrentHealth;
+
+	UPROPERTY(VisibleAnywhere)
+	float MaxHealth = 100.f;
+
+
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int CurrentMinions;
+
 
 
 
@@ -45,6 +57,10 @@ protected:
 	void MoveRight(float Value);
 
 
+private:
+
+	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<AActor> ActorToSpawn;
 
 
 public:	

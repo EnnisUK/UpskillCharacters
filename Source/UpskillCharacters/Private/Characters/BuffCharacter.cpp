@@ -12,6 +12,8 @@
 #include "Containers/EnumAsByte.h"
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraComponent.h"
+#include "GameFramework/Actor.h"
+
 
 
 
@@ -38,7 +40,7 @@ ABuffCharacter::ABuffCharacter()
 	// instead of recompiling to adjust them
 	GetCharacterMovement()->JumpZVelocity = 700.f;
 	GetCharacterMovement()->AirControl = 0.35f;
-	GetCharacterMovement()->MaxWalkSpeed = 500.f;
+	GetCharacterMovement()->MaxWalkSpeed = 600.f;
 	GetCharacterMovement()->MinAnalogWalkSpeed = 20.f;
 	GetCharacterMovement()->BrakingDecelerationWalking = 2000.f;
 
@@ -52,12 +54,59 @@ ABuffCharacter::ABuffCharacter()
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
 	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
+
+	CurrentHealth = MaxHealth;
 	
 }
 
 void ABuffCharacter::BuffAbility()
 {
+	const FVector SpawnLocation = GetActorLocation() + GetActorForwardVector() + FVector(50, 0, 0);
+	if (CurrentMinions < 3)
+	{
+		if (ActorToSpawn)
+		{
+			GetWorld()->SpawnActor<AActor>(ActorToSpawn, SpawnLocation, FRotator(0, 0, 0));
+			CurrentMinions += 1;
+			CheckBuff();
+		}
+		else
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 2, FColor::Black, TEXT("ActorToSpawnIsNotValid"));
+		}
+		
+	}
+	else
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 2, FColor::Black, TEXT("ToManyMinions"));
+	}
+
 }
+
+void ABuffCharacter::CheckBuff()
+{
+	if (CurrentMinions == 0)
+	{
+		MaxHealth = 100;
+		CurrentHealth = MaxHealth;
+		GetCharacterMovement()->MaxWalkSpeed = 600;
+
+	}
+	if (CurrentMinions == 1)
+	{
+		MaxHealth = 150;
+		CurrentHealth = MaxHealth;
+	}
+	if (CurrentMinions == 2)
+	{
+		MaxHealth = 150;
+		CurrentHealth = MaxHealth;
+		GetCharacterMovement()->MaxWalkSpeed = 900;
+	}
+}
+
+
+
 
 
 
