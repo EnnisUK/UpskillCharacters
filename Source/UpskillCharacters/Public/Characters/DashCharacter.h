@@ -6,6 +6,8 @@
 #include "GameFramework/Character.h"
 #include "DashCharacter.generated.h"
 
+class UNiagaraSystem;
+
 UCLASS()
 class UPSKILLCHARACTERS_API ADashCharacter : public ACharacter
 {
@@ -27,6 +29,8 @@ public:
 
 	void ResetDash();
 
+	void ResetInvis();
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	float SphereRadius = 200.f;
 
@@ -34,6 +38,19 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	float TeleportDistance;
+
+	UPROPERTY(EditAnywhere, Category = "DashVFX")
+	UNiagaraSystem* DashEffect;
+
+	UPROPERTY(EditAnywhere, Category = "DashVFX")
+	UMaterialInterface* InvisMaterial;
+
+	UPROPERTY(EditAnywhere, Category = "DashVFX")
+	UMaterialInterface* Element1Mat;
+
+	UPROPERTY(EditAnywhere, Category = "DashVFX")
+	UMaterialInterface* Element2Mat;
+
 
 
 protected:

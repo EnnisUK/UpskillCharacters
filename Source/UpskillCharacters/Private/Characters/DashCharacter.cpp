@@ -10,6 +10,8 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Containers/EnumAsByte.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraComponent.h"
 
 
 
@@ -55,38 +57,55 @@ ADashCharacter::ADashCharacter()
 
 void ADashCharacter::DashAbility()
 {
+	
 	FCollisionResponseParams ResponseParams;
 	FCollisionQueryParams QueryParams = FCollisionQueryParams::DefaultQueryParam;
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-	QueryParams.AddIgnoredComponent(GetMesh());
+	QueryParams.AddIgnoredActor(this);
 	FHitResult Hit;
-	const FVector StartTrace = GetMesh()->GetSocketLocation(FName("DashSocket"));
-	FRotator CurrentRotation = GetMesh()->GetSocketRotation(FName("DashSocket"));
+	const FVector StartTrace = GetFollowCamera()->GetComponentLocation();
+	FRotator CurrentRotation = GetFollowCamera()->GetComponentRotation();
 	FVector EndTrace = StartTrace + CurrentRotation.Vector() * TeleportDistance;
 
-	if (GetWorld()->LineTraceSingleByChannel(Hit, StartTrace, EndTrace, ECollisionChannel::ECC_Visibility, QueryParams, ResponseParams))
-	{
+	GetWorld()->LineTraceSingleByChannel(Hit, StartTrace, EndTrace, ECollisionChannel::ECC_Camera, QueryParams, ResponseParams);
+
 		if (!HasDash)
 		{
-			SetActorLocation(EndTrace, true);
+			LaunchCharacter(FVector(0,0,100), false, false);
+			GetMesh()->SetMaterial(0, InvisMaterial);
+			GetMesh()->SetMaterial(1, InvisMaterial);
+			SetActorLocation(FMath::Lerp(GetActorLocation(), EndTrace, 1.0f), true);
 			HasDash = true;
 			FTimerHandle DashHandle;
+			FTimerHandle InvisHandle;
 			GetWorldTimerManager().SetTimer(DashHandle, this, &ADashCharacter::ResetDash, 1.0f, false);
+			GetWorldTimerManager().SetTimer(InvisHandle, this, &ADashCharacter::ResetInvis, 3.0f, false);
+			
 
+			if (DashEffect)
+			{
+				UNiagaraComponent* NiagaraComp = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), DashEffect, GetActorLocation(), GetMesh()->GetSocketRotation(FName("DashEffect")));
+			}
 
 
 		}
 
+		DrawDebugLine(GetWorld(), StartTrace, EndTrace, FColor::Orange, true);
 
-	}
-
-	DrawDebugLine(GetWorld(), StartTrace, EndTrace, FColor::Red, false, -1, 0, 1.5);
 }
 
 void ADashCharacter::ResetDash()
 {
+
 	HasDash = false;
+	
+}
+
+void ADashCharacter::ResetInvis()
+{
+	GetMesh()->SetMaterial(0, Element1Mat);
+	GetMesh()->SetMaterial(1, Element2Mat);
 }
 
 
