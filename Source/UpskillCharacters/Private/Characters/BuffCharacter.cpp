@@ -12,6 +12,7 @@
 #include "Containers/EnumAsByte.h"
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "GameFramework/Actor.h"
 
 
@@ -96,6 +97,7 @@ void ABuffCharacter::CheckBuff()
 	{
 		MaxHealth = 150;
 		CurrentHealth = MaxHealth;
+		GetCharacterMovement()->MaxWalkSpeed = 600;
 	}
 	if (CurrentMinions == 2)
 	{

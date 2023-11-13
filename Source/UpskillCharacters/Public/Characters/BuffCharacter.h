@@ -29,12 +29,13 @@ public:
 
 	void CheckBuff();
 
-	void DamageCharacter(float DamageAmount);
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<AActor> MinionClass;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float CurrentHealth;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	float MaxHealth = 100.f;
 
 
@@ -69,6 +70,8 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+
 
 	/** Returns CameraBoom subobject **/
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
