@@ -62,12 +62,15 @@ ABuffCharacter::ABuffCharacter()
 
 void ABuffCharacter::BuffAbility()
 {
+	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
 	const FVector SpawnLocation = GetActorLocation() + GetActorForwardVector() + FVector(50, 0, 0);
 	if (CurrentMinions < 3)
 	{
 		if (ActorToSpawn)
 		{
-			GetWorld()->SpawnActor<AActor>(ActorToSpawn, SpawnLocation, FRotator(0, 0, 0));
+			FActorSpawnParameters SpawnParams = FActorSpawnParameters();
+			SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+			GetWorld()->SpawnActor<AActor>(ActorToSpawn, SpawnLocation, FRotator(0, 0, 0), SpawnParams);
 			CurrentMinions += 1;
 			CheckBuff();
 		}
@@ -105,6 +108,21 @@ void ABuffCharacter::CheckBuff()
 		CurrentHealth = MaxHealth;
 		GetCharacterMovement()->MaxWalkSpeed = 900;
 	}
+}
+
+void ABuffCharacter::SpawnAnimation()
+{
+	if (CurrentMinions < 3)
+	{
+		if (SpawnMontage)
+		{
+			PlayAnimMontage(SpawnMontage);
+		}
+		GetCharacterMovement()->DisableMovement();
+		FTimerHandle SpawnMinionHandle;
+		GetWorldTimerManager().SetTimer(SpawnMinionHandle, this, &ABuffCharacter::BuffAbility, 1.50f, false);
+	}
+	
 }
 
 
@@ -179,7 +197,7 @@ void ABuffCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	PlayerInputComponent->BindAxis("Look Up / Down Mouse", this, &APawn::AddControllerPitchInput);
 
 	//Ability
-	PlayerInputComponent->BindAction("Ability", IE_Pressed, this, &ABuffCharacter::BuffAbility);
+	PlayerInputComponent->BindAction("Ability", IE_Pressed, this, &ABuffCharacter::SpawnAnimation);
 
 
 }

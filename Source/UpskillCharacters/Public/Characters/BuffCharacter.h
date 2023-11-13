@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Animation/AnimMontage.h"
 #include "BuffCharacter.generated.h"
 
 class UNiagaraSystem;
@@ -27,7 +28,10 @@ public:
 
 	void BuffAbility();
 
+	UFUNCTION(BlueprintCallable)
 	void CheckBuff();
+
+	void SpawnAnimation();
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AActor> MinionClass;
@@ -42,6 +46,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int CurrentMinions;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UAnimMontage* SpawnMontage;
 
 
 

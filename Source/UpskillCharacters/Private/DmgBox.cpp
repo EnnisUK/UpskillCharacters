@@ -29,12 +29,11 @@ void ADmgBox::BeginPlay()
 
 void ADmgBox::OnBoxOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (Cast<ABuffCharacter>(OtherActor))
+	if (ABuffCharacter * BuffCharRef = Cast<ABuffCharacter>(OtherActor))
 	{
 		TSubclassOf<UDamageType> DamageType;
 		UGameplayStatics::ApplyDamage(OtherActor, 15, GetInstigatorController(), this, DamageType);
 		GEngine->AddOnScreenDebugMessage(-1, 2, FColor::Black, TEXT("BuffCharacter"));
-		ABuffCharacter* BuffCharRef = Cast<ABuffCharacter>(OtherActor);
 		BuffCharRef->CheckBuff();
 	}
 	else
